@@ -1,0 +1,11 @@
+
+
+* Decide on how assembler will be made
+  - as single function accepting assembly or
+  - each assembly operation as function.
+
+* In assembly try to implement assembly macro.
+** Assembly for x86_64 ARM
+* find about self modifying code example, try to run it directly from scheme.
+
+* than next scheme to scheme
