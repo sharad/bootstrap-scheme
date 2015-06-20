@@ -1,13 +1,15 @@
 
+
+
 .PHONY: clean
 
 # CFLAGS=-Wall -ansi
 # CFLAGS=-g -ggdb -g3 -ggdb3 -Wall -ansi
 CFLAGS=-g -ggdb -g3 -ggdb3 -Wall -Werror #-Wimplicit-function-declaration
 
-OBJECTS=scheme.o
+OBJECTS=model.o builtinproc.o read.o print.o eval.o scheme.o
 
-all: tags scheme
+all: tags scheme1 scheme
 
 scheme: $(OBJECTS)
 	$(CC) -g -ggdb -g3 -ggdb3 -Wall -o $@ $(OBJECTS)
@@ -15,6 +17,9 @@ scheme: $(OBJECTS)
 	cd 864sch ; echo '(begin (load "../lib/stdlib.scm") (load "hello-elf.scm"))' | ../scheme ; cd ..
 	readelf -e 864sch/hello
 	864sch/hello
+
+scheme1: scheme1.o
+	$(CC) -g -ggdb -g3 -ggdb3 -Wall -o $@ $<
 
 GPATH GRTAGS GSYMS GTAGS:
 	gtags -v
