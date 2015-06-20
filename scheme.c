@@ -21,6 +21,8 @@
 #include <string.h>
 #include <ctype.h>
 
+int debug = 0;
+
 /**************************** MODEL ******************************/
 
 typedef enum {THE_EMPTY_LIST, BOOLEAN, SYMBOL, FIXNUM,
@@ -99,6 +101,7 @@ object *eof_object;
 object *the_empty_environment;
 object *the_global_environment;
 
+object *read(FILE *in);
 object *cons(object *car, object *cdr);
 object *car(object *pair);
 object *cdr(object *pair);
@@ -122,7 +125,7 @@ char is_true(object *obj) {
 object *make_symbol(char *value) {
     object *obj;
     object *element;
-    
+
     /* search for they symbol in the symbol table */
     element = symbol_table;
     while (!is_the_empty_list(element)) {
@@ -131,7 +134,7 @@ object *make_symbol(char *value) {
         }
         element = cdr(element);
     };
-    
+
     /* create the symbol and add it to the symbol table */
     obj = alloc_object();
     obj->type = SYMBOL;
@@ -195,7 +198,7 @@ char is_string(object *obj) {
 
 object *cons(object *car, object *cdr) {
     object *obj;
-    
+
     obj = alloc_object();
     obj->type = PAIR;
     obj->data.pair.car = car;
@@ -208,7 +211,15 @@ char is_pair(object *obj) {
 }
 
 object *car(object *pair) {
+  /* if (pair->type == PAIR) */
     return pair->data.pair.car;
+  /* else */
+  /* { */
+  /*     fprintf(stderr, "is not pair\n"); */
+  /*     //return read(stdin); */
+  /*     exit(0); */
+  /* } */
+
 }
 
 void set_car(object *obj, object* value) {
@@ -298,7 +309,7 @@ char is_compound_proc(object *obj);
 
 object *is_procedure_proc(object *arguments) {
     object *obj;
-    
+
     obj = car(arguments);
     return (is_primitive_proc(obj) ||
             is_compound_proc(obj)) ?
@@ -314,11 +325,23 @@ object *integer_to_char_proc(object *arguments) {
     return make_character((car(arguments))->data.fixnum.value);
 }
 
-object *number_to_string_proc(object *arguments) {
-    char buffer[100];
+char* itoa(int val, int base){
 
-    sprintf(buffer, "%ld", (car(arguments))->data.fixnum.value);
-    return make_string(buffer);
+	static char buf[32] = {0};
+
+	int i = 30;
+        if (val)
+          for(; val && i ; --i, val /= base)
+            buf[i] = "0123456789abcdef"[val % base];
+        else
+            buf[i--] = '0';
+
+	return &buf[i+1];
+}
+
+object *number_to_string_proc(object *arguments) {
+    int base = (cadr(arguments))->data.fixnum.value;
+    return make_string( itoa((car(arguments))->data.fixnum.value, base) );
 }
 
 object *string_to_number_proc(object *arguments) {
@@ -335,7 +358,7 @@ object *string_to_symbol_proc(object *arguments) {
 
 object *add_proc(object *arguments) {
     long result = 0;
-    
+
     while (!is_the_empty_list(arguments)) {
         result += (car(arguments))->data.fixnum.value;
         arguments = cdr(arguments);
@@ -345,7 +368,7 @@ object *add_proc(object *arguments) {
 
 object *sub_proc(object *arguments) {
     long result;
-    
+
     result = (car(arguments))->data.fixnum.value;
     while (!is_the_empty_list(arguments = cdr(arguments))) {
         result -= (car(arguments))->data.fixnum.value;
@@ -355,7 +378,7 @@ object *sub_proc(object *arguments) {
 
 object *mul_proc(object *arguments) {
     long result = 1;
-    
+
     while (!is_the_empty_list(arguments)) {
         result *= (car(arguments))->data.fixnum.value;
         arguments = cdr(arguments);
@@ -377,7 +400,7 @@ object *remainder_proc(object *arguments) {
 
 object *is_number_equal_proc(object *arguments) {
     long value;
-    
+
     value = (car(arguments))->data.fixnum.value;
     while (!is_the_empty_list(arguments = cdr(arguments))) {
         if (value != ((car(arguments))->data.fixnum.value)) {
@@ -390,7 +413,7 @@ object *is_number_equal_proc(object *arguments) {
 object *is_less_than_proc(object *arguments) {
     long previous;
     long next;
-    
+
     previous = (car(arguments))->data.fixnum.value;
     while (!is_the_empty_list(arguments = cdr(arguments))) {
         next = (car(arguments))->data.fixnum.value;
@@ -407,7 +430,7 @@ object *is_less_than_proc(object *arguments) {
 object *is_greater_than_proc(object *arguments) {
     long previous;
     long next;
-    
+
     previous = (car(arguments))->data.fixnum.value;
     while (!is_the_empty_list(arguments = cdr(arguments))) {
         next = (car(arguments))->data.fixnum.value;
@@ -448,34 +471,87 @@ object *list_proc(object *arguments) {
 }
 
 object *is_eq_proc(object *arguments) {
-    object *obj1;
-    object *obj2;
-    
+    object *obj1 = NULL;
+    object *obj2 = NULL;
+
     obj1 = car(arguments);
     obj2 = cadr(arguments);
-    
+
     if (obj1->type != obj2->type) {
         return false;
     }
     switch (obj1->type) {
         case FIXNUM:
-            return (obj1->data.fixnum.value == 
+            return (obj1->data.fixnum.value ==
                     obj2->data.fixnum.value) ?
                         true : false;
             break;
         case CHARACTER:
-            return (obj1->data.character.value == 
+            return (obj1->data.character.value ==
                     obj2->data.character.value) ?
                         true : false;
             break;
         case STRING:
-            return (strcmp(obj1->data.string.value, 
+            return (strcmp(obj1->data.string.value,
                            obj2->data.string.value) == 0) ?
                         true : false;
             break;
         default:
             return (obj1 == obj2) ? true : false;
     }
+}
+/*
+object *is_eqv_pair_internal(object *arguments) {
+      object *car_obj1 = NULL;
+      object *cdr_obj1 = NULL;
+      object *car_obj2 = NULL;
+      object *cdr_obj2 = NULL;
+
+      car_obj1 = car(obj1);
+      car_obj2 = car(obj2);
+      cdr_obj1 = cdr(obj1);
+      cdr_obj2 = cdr(obj2);
+
+
+      return is_eqv_proc(car_obj1, car_obj2) &&
+        is_eqv_proc(cdr_obj1, cdr_obj1);
+}
+*/
+
+object *is_eqv_proc(object *arguments) {
+  object *obj1 = NULL;
+  object *obj2 = NULL;
+
+  obj1 = car(arguments);
+  obj2 = cadr(arguments);
+
+  if (obj1->type != obj2->type) {
+    return false;
+  }
+  switch (obj1->type) {
+  case FIXNUM:
+    return (obj1->data.fixnum.value ==
+            obj2->data.fixnum.value) ?
+      true : false;
+    break;
+  case CHARACTER:
+    return (obj1->data.character.value ==
+            obj2->data.character.value) ?
+      true : false;
+    break;
+  case STRING:
+    return (strcmp(obj1->data.string.value,
+                   obj2->data.string.value) == 0) ?
+      true : false;
+    break;
+  case SYMBOL:
+    return (strcmp(obj1->data.symbol.value,
+                   obj2->data.symbol.value) == 0) ?
+      true : false;
+    break;
+  default:
+    return (obj1 == obj2) ? true : false;
+  }
 }
 
 object *apply_proc(object *arguments) {
@@ -506,7 +582,7 @@ object *eval_proc(object *arguments) {
     exit(1);
 }
 
-object *read(FILE *in);
+/* object *read(FILE *in); */
 object *eval(object *exp, object *env);
 
 object *load_proc(object *arguments) {
@@ -514,7 +590,7 @@ object *load_proc(object *arguments) {
     FILE *in;
     object *exp;
     object *result;
-    
+
     filename = car(arguments)->data.string.value;
     in = fopen(filename, "r");
     if (in == NULL) {
@@ -545,7 +621,7 @@ object *open_input_port_proc(object *arguments) {
 
 object *close_input_port_proc(object *arguments) {
     int result;
-    
+
     result = fclose(car(arguments)->data.input_port.stream);
     if (result == EOF) {
         fprintf(stderr, "could not close input port\n");
@@ -563,7 +639,7 @@ object *is_input_port_proc(object *arguments) {
 object *read_proc(object *arguments) {
     FILE *in;
     object *result;
-    
+
     in = is_the_empty_list(arguments) ?
              stdin :
              car(arguments)->data.input_port.stream;
@@ -574,7 +650,7 @@ object *read_proc(object *arguments) {
 object *read_char_proc(object *arguments) {
     FILE *in;
     int result;
-    
+
     in = is_the_empty_list(arguments) ?
              stdin :
              car(arguments)->data.input_port.stream;
@@ -587,7 +663,7 @@ int peek(FILE *in);
 object *peek_char_proc(object *arguments) {
     FILE *in;
     int result;
-    
+
     in = is_the_empty_list(arguments) ?
              stdin :
              car(arguments)->data.input_port.stream;
@@ -618,7 +694,7 @@ object *open_output_port_proc(object *arguments) {
 
 object *close_output_port_proc(object *arguments) {
     int result;
-    
+
     result = fclose(car(arguments)->data.output_port.stream);
     if (result == EOF) {
         fprintf(stderr, "could not close output port\n");
@@ -636,13 +712,13 @@ object *is_output_port_proc(object *arguments) {
 object *write_char_proc(object *arguments) {
     object *character;
     FILE *out;
-    
+
     character = car(arguments);
     arguments = cdr(arguments);
     out = is_the_empty_list(arguments) ?
              stdout :
              car(arguments)->data.output_port.stream;
-    putc(character->data.character.value, out);    
+    putc(character->data.character.value, out);
     fflush(out);
     return ok_symbol;
 }
@@ -652,13 +728,29 @@ void write(FILE *out, object *obj);
 object *write_proc(object *arguments) {
     object *exp;
     FILE *out;
-    
+
     exp = car(arguments);
     arguments = cdr(arguments);
     out = is_the_empty_list(arguments) ?
              stdout :
              car(arguments)->data.output_port.stream;
     write(out, exp);
+    fflush(out);
+    return ok_symbol;
+}
+
+void display(FILE *out, object *obj);
+
+object *display_proc(object *arguments) {
+    object *exp;
+    FILE *out;
+
+    exp = car(arguments);
+    arguments = cdr(arguments);
+    out = is_the_empty_list(arguments) ?
+             stdout :
+             car(arguments)->data.output_port.stream;
+    display(out, exp);
     fflush(out);
     return ok_symbol;
 }
@@ -673,10 +765,119 @@ object *error_proc(object *arguments) {
     exit(1);
 }
 
+object *bit_and_proc(object *arguments) {
+  object *obj1 = NULL;
+  object *obj2 = NULL;
+
+  obj1 = car(arguments);
+  obj2 = cadr(arguments);
+
+  if (debug)
+  {
+      printf("\n%s: ", __FUNCTION__);
+      write (stdout, arguments);
+      printf("\n");
+  }
+  if (FIXNUM != obj1->type ||
+      FIXNUM != obj2->type) {
+      printf("\narguments are not numbers\n");
+      exit(1);
+  }
+
+  return make_fixnum(obj1->data.fixnum.value & obj2->data.fixnum.value);
+}
+
+object *bit_or_proc(object *arguments) {
+  object *obj1 = NULL;
+  object *obj2 = NULL;
+
+  obj1 = car(arguments);
+  obj2 = cadr(arguments);
+
+  if (debug)
+  {
+      printf("\n%s: ", __FUNCTION__);
+      write (stdout, arguments);
+      printf("\n");
+  }
+  if (FIXNUM != obj1->type ||
+      FIXNUM != obj2->type) {
+      printf("\narguments are not numbers\n");
+      exit(1);
+  }
+
+  return make_fixnum(obj1->data.fixnum.value | obj2->data.fixnum.value);
+}
+
+object *bit_xor_proc(object *arguments) {
+  object *obj1 = NULL;
+  object *obj2 = NULL;
+
+  obj1 = car(arguments);
+  obj2 = cadr(arguments);
+
+  if (debug)
+  {
+      printf("\n%s: ", __FUNCTION__);
+      write (stdout, arguments);
+      printf("\n");
+  }
+  if (FIXNUM != obj1->type ||
+      FIXNUM != obj2->type) {
+      printf("\narguments are not numbers\n");
+      exit(1);
+  }
+
+  return make_fixnum(obj1->data.fixnum.value ^ obj2->data.fixnum.value);
+}
+
+object *bit_inverse_proc(object *arguments) {
+  object *obj1 = NULL;
+
+  obj1 = car(arguments);
+
+  if (debug)
+  {
+      printf("\n%s: ", __FUNCTION__);
+      write (stdout, arguments);
+      printf("\n");
+  }
+  if (FIXNUM != obj1->type) {
+      printf("\narguments are not numbers\n");
+      exit(1);
+  }
+
+  return make_fixnum(~(obj1->data.fixnum.value));
+}
+
+/*
+object *bit_quotient_proc(object *arguments) {
+  object *obj1 = NULL;
+  object *obj2 = NULL;
+
+  obj1 = car(arguments);
+  obj2 = cadr(arguments);
+
+  if (debug)
+  {
+      printf("\n%s: ", __FUNCTION__);
+      write (stdout, arguments);
+      printf("\n");
+  }
+  if (FIXNUM != obj1->type ||
+      FIXNUM != obj2->type) {
+      printf("\narguments are not numbers\n");
+      exit(1);
+  }
+
+  return make_fixnum(obj1->data.fixnum.value / obj2->data.fixnum.value);
+}
+*/
+
 object *make_compound_proc(object *parameters, object *body,
                            object* env) {
     object *obj;
-    
+
     obj = alloc_object();
     obj->type = COMPOUND_PROC;
     obj->data.compound_proc.parameters = parameters;
@@ -691,7 +892,7 @@ char is_compound_proc(object *obj) {
 
 object *make_input_port(FILE *stream) {
     object *obj;
-    
+
     obj = alloc_object();
     obj->type = INPUT_PORT;
     obj->data.input_port.stream = stream;
@@ -704,7 +905,7 @@ char is_input_port(object *obj) {
 
 object *make_output_port(FILE *stream) {
     object *obj;
-    
+
     obj = alloc_object();
     obj->type = OUTPUT_PORT;
     obj->data.output_port.stream = stream;
@@ -728,7 +929,14 @@ object *first_frame(object *env) {
 }
 
 object *make_frame(object *variables, object *values) {
-    return cons(variables, values);
+    if (debug)
+    {
+        printf("\n---vars\n");   write(stdout, variables);
+        printf("\n---values\n"); write(stdout, values);
+        printf("\n---cons\n");   write(stdout, cons(variables, values));
+        printf("\n---\n");
+    }
+  return cons(variables, values);
 }
 
 object *frame_variables(object *frame) {
@@ -739,7 +947,7 @@ object *frame_values(object *frame) {
     return cdr(frame);
 }
 
-void add_binding_to_frame(object *var, object *val, 
+void add_binding_to_frame(object *var, object *val,
                           object *frame) {
     set_car(frame, cons(var, car(frame)));
     set_cdr(frame, cons(val, cdr(frame)));
@@ -754,13 +962,38 @@ object *lookup_variable_value(object *var, object *env) {
     object *frame;
     object *vars;
     object *vals;
+    if (debug)
+    {
+        fprintf(stderr, "entering lookup_variable_value searching for %s\n", var->data.symbol.value);
+    }
     while (!is_the_empty_list(env)) {
         frame = first_frame(env);
-        vars = frame_variables(frame);
-        vals = frame_values(frame);
+        vars  = frame_variables(frame);
+        vals  = frame_values(frame);
+        if (debug)
+        {
+            fprintf(stderr, "1 searching symbol %s\n", var->data.symbol.value);
+            fprintf(stderr, "1 vars %p\n", vars);
+        }
         while (!is_the_empty_list(vars)) {
-            if (var == car(vars)) {
-                return car(vals);
+            if (is_pair(vars)) {
+                if (var == car(vars)) {
+                    return car(vals);
+                }
+            }
+            else if(is_symbol(vars)) {
+                if (debug)
+                {
+                    fprintf(stderr, "2 searched symbol %s\n", var->data.symbol.value);
+                    fprintf(stderr, "last cdr symbol %s\n", vars->data.symbol.value);
+                }
+                if (var == vars) {
+                    return vals;
+                }
+                else
+                {
+                  break;
+                }
             }
             vars = cdr(vars);
             vals = cdr(vals);
@@ -778,8 +1011,8 @@ void set_variable_value(object *var, object *val, object *env) {
 
     while (!is_the_empty_list(env)) {
         frame = first_frame(env);
-        vars = frame_variables(frame);
-        vals = frame_values(frame);
+        vars  = frame_variables(frame);
+        vals  = frame_values(frame);
         while (!is_the_empty_list(vars)) {
             if (var == car(vars)) {
                 set_car(vals, val);
@@ -798,8 +1031,8 @@ void define_variable(object *var, object *val, object *env) {
     object *frame;
     object *vars;
     object *vals;
-    
-    frame = first_frame(env);    
+
+    frame = first_frame(env);
     vars = frame_variables(frame);
     vals = frame_values(frame);
 
@@ -816,7 +1049,7 @@ void define_variable(object *var, object *val, object *env) {
 
 object *setup_environment(void) {
     object *initial_env;
-    
+
     initial_env = extend_environment(
                       the_empty_list,
                       the_empty_list,
@@ -839,14 +1072,14 @@ void populate_environment(object *env) {
     add_procedure("string?"    , is_string_proc);
     add_procedure("pair?"      , is_pair_proc);
     add_procedure("procedure?" , is_procedure_proc);
-    
+
     add_procedure("char->integer" , char_to_integer_proc);
     add_procedure("integer->char" , integer_to_char_proc);
     add_procedure("number->string", number_to_string_proc);
     add_procedure("string->number", string_to_number_proc);
     add_procedure("symbol->string", symbol_to_string_proc);
     add_procedure("string->symbol", string_to_symbol_proc);
-      
+
     add_procedure("+"        , add_proc);
     add_procedure("-"        , sub_proc);
     add_procedure("*"        , mul_proc);
@@ -864,10 +1097,12 @@ void populate_environment(object *env) {
     add_procedure("list"    , list_proc);
 
     add_procedure("eq?", is_eq_proc);
+    add_procedure("eqv?", is_eqv_proc);
+
 
     add_procedure("apply", apply_proc);
-    
-    add_procedure("interaction-environment", 
+
+    add_procedure("interaction-environment",
                                      interaction_environment_proc);
     add_procedure("null-environment", null_environment_proc);
     add_procedure("environment"     , environment_proc);
@@ -886,13 +1121,21 @@ void populate_environment(object *env) {
     add_procedure("output-port?"     , is_output_port_proc);
     add_procedure("write-char"       , write_char_proc);
     add_procedure("write"            , write_proc);
+    add_procedure("display"          , display_proc);
 
     add_procedure("error", error_proc);
+
+    add_procedure("&", bit_and_proc);
+    add_procedure("|", bit_or_proc);
+    add_procedure("^", bit_xor_proc);
+    add_procedure("~", bit_inverse_proc);
+    // add_procedure("quotient", bit_quotient_proc);
+
 }
 
 object *make_environment(void) {
     object *env;
-    
+
     env = setup_environment();
     populate_environment(env);
     return env;
@@ -909,7 +1152,7 @@ void init(void) {
     true = alloc_object();
     true->type = BOOLEAN;
     true->data.boolean.value = 1;
-    
+
     symbol_table = the_empty_list;
     quote_symbol = make_symbol("quote");
     define_symbol = make_symbol("define");
@@ -921,12 +1164,15 @@ void init(void) {
     cond_symbol = make_symbol("cond");
     else_symbol = make_symbol("else");
     let_symbol = make_symbol("let");
+    // TODO
     and_symbol = make_symbol("and");
     or_symbol = make_symbol("or");
-    
+    /* and_symbol = make_symbol("&&"); */
+    /* or_symbol = make_symbol("||"); */
+
     eof_object = alloc_object();
     eof_object->type = EOF_OBJECT;
-    
+
     the_empty_environment = the_empty_list;
 
     the_global_environment = make_environment();
@@ -941,8 +1187,16 @@ char is_delimiter(int c) {
 }
 
 char is_initial(int c) {
+    /* return isalpha(c) || c == '*' || c == '/' || c == '>' || */
+    /*          c == '<' || c == '=' || c == '?' || c == '!'; */
     return isalpha(c) || c == '*' || c == '/' || c == '>' ||
-             c == '<' || c == '=' || c == '?' || c == '!';
+        c == '<' || c == '=' || c == '?' || c == '!' ||
+        c == ':' || c == '@' || c == '&' || c == '|' || c == '_';
+
+}
+
+char is_postinitial(int c) {
+    return c == '+' || c == '-' || c == '_';
 }
 
 int peek(FILE *in) {
@@ -955,7 +1209,7 @@ int peek(FILE *in) {
 
 void eat_whitespace(FILE *in) {
     int c;
-    
+
     while ((c = getc(in)) != EOF) {
         if (isspace(c)) {
             continue;
@@ -1020,9 +1274,9 @@ object *read_pair(FILE *in) {
     int c;
     object *car_obj;
     object *cdr_obj;
-    
+
     eat_whitespace(in);
-    
+
     c = getc(in);
     if (c == ')') { /* read the empty list */
         return the_empty_list;
@@ -1032,8 +1286,8 @@ object *read_pair(FILE *in) {
     car_obj = read(in);
 
     eat_whitespace(in);
-    
-    c = getc(in);    
+
+    c = getc(in);
     if (c == '.') { /* read improper list */
         c = peek(in);
         if (!is_delimiter(c)) {
@@ -1052,7 +1306,7 @@ object *read_pair(FILE *in) {
     }
     else { /* read list */
         ungetc(c, in);
-        cdr_obj = read_pair(in);        
+        cdr_obj = read_pair(in);
         return cons(car_obj, cdr_obj);
     }
 }
@@ -1067,7 +1321,7 @@ object *read(FILE *in) {
 
     eat_whitespace(in);
 
-    c = getc(in);    
+    c = getc(in);
 
     if (c == '#') { /* read a boolean or character */
         c = getc(in);
@@ -1078,13 +1332,47 @@ object *read(FILE *in) {
                 return false;
             case '\\':
                 return read_character(in);
+            case  'x':
+                /* read a fixnum */
+                c =getc(in);
+                if (c == '-') {
+                    sign = -1;
+                }
+                else {
+                    ungetc(c, in);
+                }
+                while (isxdigit(c = getc(in))) {
+                    if (isdigit(c))
+                    {
+                        num = (num * 16) + (c - '0');
+                    }
+                    else if (isupper(c))
+                    {
+                        num = (num * 16) + (c - 'A') + 10;
+                    }
+                    else
+                    {
+                        num = (num * 16) + (c - 'a') + 10;
+                    }
+                }
+                num *= sign;
+                if (is_delimiter(c)) {
+                    ungetc(c, in);
+                    return make_fixnum(num);
+                }
+                else {
+                    fprintf(stderr, "number not followed by delimiter\n");
+                    exit(1);
+                }
+
             default:
                 fprintf(stderr,
                         "unknown boolean or character literal\n");
                 exit(1);
         }
     }
-    else if (isdigit(c) || (c == '-' && (isdigit(peek(in))))) {
+    else if (isdigit(c) ||
+             (c == '-' && (isdigit(peek(in))))) {
         /* read a fixnum */
         if (c == '-') {
             sign = -1;
@@ -1106,11 +1394,16 @@ object *read(FILE *in) {
         }
     }
     else if (is_initial(c) ||
-             ((c == '+' || c == '-') &&
+             ((c == '+' ||
+               c == '-' ||
+               c == ':') &&
               is_delimiter(peek(in)))) { /* read a symbol */
         i = 0;
         while (is_initial(c) || isdigit(c) ||
-               c == '+' || c == '-') {
+               c == '+' ||
+               c == '-' ||
+               c == ':' ||
+               is_postinitial(c)) {
             /* subtract 1 to save space for '\0' terminator */
             if (i < BUFFER_MAX - 1) {
                 buffer[i++] = c;
@@ -1151,7 +1444,7 @@ object *read(FILE *in) {
                 buffer[i++] = c;
             }
             else {
-                fprintf(stderr, 
+                fprintf(stderr,
                         "string too long. Maximum length is %d\n",
                         BUFFER_MAX);
                 exit(1);
@@ -1348,7 +1641,7 @@ object *sequence_to_exp(object *seq) {
 object *expand_clauses(object *clauses) {
     object *first;
     object *rest;
-    
+
     if (is_the_empty_list(clauses)) {
         return false;
     }
@@ -1506,14 +1799,14 @@ object *list_of_values(object *exps, object *env) {
 }
 
 object *eval_assignment(object *exp, object *env) {
-    set_variable_value(assignment_variable(exp), 
+    set_variable_value(assignment_variable(exp),
                        eval(assignment_value(exp), env),
                        env);
     return ok_symbol;
 }
 
 object *eval_definition(object *exp, object *env) {
-    define_variable(definition_variable(exp), 
+    define_variable(definition_variable(exp),
                     eval(definition_value(exp), env),
                     env);
     return ok_symbol;
@@ -1523,6 +1816,12 @@ object *eval(object *exp, object *env) {
     object *procedure;
     object *arguments;
     object *result;
+
+    // printf("\n------------ exp ------------\n");
+    // write(stdout, exp);
+    // printf("\n------------ env ------------\n");
+    // write(stdout, env);
+    // printf("\n------------ end ------------\n");
 
 tailcall:
     if (is_self_evaluating(exp)) {
@@ -1603,7 +1902,7 @@ tailcall:
         arguments = list_of_values(operands(exp), env);
 
         /* handle eval specially for tail call requirement */
-        if (is_primitive_proc(procedure) && 
+        if (is_primitive_proc(procedure) &&
             procedure->data.primitive_proc.fn == eval_proc) {
             exp = eval_expression(arguments);
             env = eval_environment(arguments);
@@ -1611,7 +1910,7 @@ tailcall:
         }
 
         /* handle apply specially for tail call requirement */
-        if (is_primitive_proc(procedure) && 
+        if (is_primitive_proc(procedure) &&
             procedure->data.primitive_proc.fn == apply_proc) {
             procedure = apply_operator(arguments);
             arguments = apply_operands(arguments);
@@ -1621,7 +1920,7 @@ tailcall:
             return (procedure->data.primitive_proc.fn)(arguments);
         }
         else if (is_compound_proc(procedure)) {
-            env = extend_environment( 
+            env = extend_environment(
                        procedure->data.compound_proc.parameters,
                        arguments,
                        procedure->data.compound_proc.env);
@@ -1646,7 +1945,7 @@ tailcall:
 void write_pair(FILE *out, object *pair) {
     object *car_obj;
     object *cdr_obj;
-    
+
     car_obj = car(pair);
     cdr_obj = cdr(pair);
     write(out, car_obj);
@@ -1666,7 +1965,7 @@ void write_pair(FILE *out, object *pair) {
 void write(FILE *out, object *obj) {
     char c;
     char *str;
-    
+
     switch (obj->type) {
         case THE_EMPTY_LIST:
             fprintf(out, "()");
@@ -1730,14 +2029,81 @@ void write(FILE *out, object *obj) {
             fprintf(out, "#<input-port>");
             break;
         case OUTPUT_PORT:
-            fprintf(out, "#<output-port>");
-            break;
+          fprintf(out, "#<output-port>");
+          break;
         case EOF_OBJECT:
-            fprintf(out, "#<eof>");
-            break;
+          fprintf(out, "#<eof>");
+          break;
         default:
-            fprintf(stderr, "cannot write unknown type\n");
-            exit(1);
+          fprintf(stderr, "cannot write unknown type\n");
+          /* return read(stdin); */
+          exit(1);
+    }
+}
+
+void display(FILE *out, object *obj) {
+    // char c;
+    char *str;
+
+    switch (obj->type) {
+        case THE_EMPTY_LIST:
+            fprintf(out, "()");
+            break;
+        case BOOLEAN:
+            fprintf(out, "#%c", is_false(obj) ? 'f' : 't');
+            break;
+        case SYMBOL:
+            fprintf(out, "%s", obj->data.symbol.value);
+            break;
+        case FIXNUM:
+            fprintf(out, "%ld", obj->data.fixnum.value);
+            break;
+        case CHARACTER:
+            putc(obj->data.character.value, out);
+            break;
+        case STRING:
+            str = obj->data.string.value;
+            while (*str != '\0') {
+                switch (*str) {
+                    case '\n':
+                        fprintf(out, "\n");
+                        break;
+                    case '\\':
+                        fprintf(out, "\\");
+                        break;
+                    case '"':
+                        fprintf(out, "\"");
+                        break;
+                    default:
+                        putc(*str, out);
+                }
+                str++;
+            }
+            break;
+        case PAIR:
+            fprintf(out, "(");
+            write_pair(out, obj);
+            fprintf(out, ")");
+            break;
+        case PRIMITIVE_PROC:
+            fprintf(out, "#<primitive-procedure>");
+            break;
+        case COMPOUND_PROC:
+            fprintf(out, "#<compound-procedure>");
+            break;
+        case INPUT_PORT:
+            fprintf(out, "#<input-port>");
+            break;
+        case OUTPUT_PORT:
+          fprintf(out, "#<output-port>");
+          break;
+        case EOF_OBJECT:
+          fprintf(out, "#<eof>");
+          break;
+        default:
+          fprintf(stderr, "cannot write unknown type\n");
+          /* return read(stdin); */
+          exit(1);
     }
 }
 
@@ -1754,13 +2120,18 @@ int main(void) {
     while (1) {
         printf("> ");
         exp = read(stdin);
+
+        // printf("\n------------ read exp ------------\n");
+        // write(stdout, exp);
+        // printf("\n------------ read exp ------------\n");
+
         if (exp == NULL) {
             break;
         }
         write(stdout, eval(exp, the_global_environment));
         printf("\n");
     }
-    
+
     printf("Goodbye\n");
 
     return 0;

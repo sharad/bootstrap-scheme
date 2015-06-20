@@ -1,3 +1,31 @@
+bash_history
+\#*\#
+*.el[a-z0-9._]*
+TAGS
+# *
+*.[oa]
+*~
+*.pyc
+.#*
+Organize
+bbdb
+msmtprc
+offlineimaprc
+netrc
+.svn
+RCS
+*.undo
+yawkn
+spaa.cresh
 .* # Ignore all dotfiles...
 !.gitignore # except for .gitignore
 scheme
+scheme1
+CTAGS
+GPATH
+GRTAGS
+GSYMS
+GTAGS
+cscope.out
+scheme1
+

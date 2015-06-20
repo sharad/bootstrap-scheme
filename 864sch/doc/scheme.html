@@ -1,0 +1,354 @@
+<html>
+<head>
+
+
+<script type="text/javascript" src="/static/js/analytics.js"></script>
+<script type="text/javascript">archive_analytics.values.server_name="wwwb-app18.us.archive.org";archive_analytics.values.server_ms=165;</script>
+<link type="text/css" rel="stylesheet" href="/static/css/banner-styles.css"/>
+
+
+<title>The 'dream' Scheme Interpreter</title>
+<style type="text/css"> 
+body { background-color:black; color:white; font-family:sans-serif; }
+a { text-decoration:underline; }
+</style>
+</head>
+
+
+
+<!-- BEGIN WAYBACK TOOLBAR INSERT -->
+<script type="text/javascript" src="/static/js/disclaim-element.js" ></script>
+<script type="text/javascript" src="/static/js/graph-calc.js" ></script>
+<script type="text/javascript" src="/static/jflot/jquery.min.js" ></script>
+<script type="text/javascript">//<![CDATA[
+var __wm = (function(){
+var wbPrefix = "/web/";
+var wbCurrentUrl = "http://www.stripedgazelle.org/joey/dream.html";
+
+var firstYear = 1996;
+var imgWidth = 500,imgHeight = 27;
+var yearImgWidth = 25,monthImgWidth = 2;
+var displayDay = "2";
+var displayMonth = "Jan";
+var displayYear = "2013";
+var prettyMonths = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+var $D=document,$=function(n){return document.getElementById(n)};
+var trackerVal,curYear = -1,curMonth = -1;
+var yearTracker,monthTracker;
+function showTrackers(val) {
+  if (val===trackerVal) return;
+  var $ipp=$("wm-ipp");
+  var $y=$("displayYearEl"),$m=$("displayMonthEl"),$d=$("displayDayEl");
+  if (val) {
+    $ipp.className="hi";
+  } else {
+    $ipp.className="";
+    $y.innerHTML=displayYear;$m.innerHTML=displayMonth;$d.innerHTML=displayDay;
+  }
+  yearTracker.style.display=val?"inline":"none";
+  monthTracker.style.display=val?"inline":"none";
+  trackerVal = val;
+}
+function getElementX2(obj) {
+  var $e=jQuery(obj);
+  return (typeof $e=="undefined"||typeof $e.offset=="undefined")?
+    getElementX(obj):Math.round($e.offset().left);
+}
+function trackMouseMove(event,element) {
+  var eventX = getEventX(event);
+  var elementX = getElementX2(element);
+  var xOff = Math.min(Math.max(0, eventX - elementX),imgWidth);
+  var monthOff = xOff % yearImgWidth;
+
+  var year = Math.floor(xOff / yearImgWidth);
+  var monthOfYear = Math.min(11,Math.floor(monthOff / monthImgWidth));
+  // 1 extra border pixel at the left edge of the year:
+  var month = (year * 12) + monthOfYear;
+  var day = monthOff % 2==1?15:1;
+  var dateString = zeroPad(year + firstYear) + zeroPad(monthOfYear+1,2) +
+    zeroPad(day,2) + "000000";
+
+  $("displayYearEl").innerHTML=year+firstYear;
+  $("displayMonthEl").innerHTML=prettyMonths[monthOfYear];
+  // looks too jarring when it changes..
+  //$("displayDayEl").innerHTML=zeroPad(day,2);
+  var url = wbPrefix + dateString + '/' +  wbCurrentUrl;
+  $("wm-graph-anchor").href=url;
+
+  if(curYear != year) {
+    var yrOff = year * yearImgWidth;
+    yearTracker.style.left = yrOff + "px";
+    curYear = year;
+  }
+  if(curMonth != month) {
+    var mtOff = year + (month * monthImgWidth) + 1;
+    monthTracker.style.left = mtOff + "px";
+    curMonth = month;
+  }
+}
+function hideToolbar() {
+  $("wm-ipp").style.display="none";
+}
+function bootstrap() {
+  var $spk=$("wm-ipp-sparkline");
+  yearTracker=$D.createElement('div');
+  yearTracker.className='yt';
+  with(yearTracker.style){
+    display='none';width=yearImgWidth+"px";height=imgHeight+"px";
+  }
+  monthTracker=$D.createElement('div');
+  monthTracker.className='mt';
+  with(monthTracker.style){
+    display='none';width=monthImgWidth+"px";height=imgHeight+"px";
+  }
+  $spk.appendChild(yearTracker);
+  $spk.appendChild(monthTracker);
+
+  var $ipp=$("wm-ipp");
+  $ipp&&disclaimElement($ipp);
+}
+return{st:showTrackers,mv:trackMouseMove,h:hideToolbar,bt:bootstrap};
+})();//]]>
+</script>
+<style type="text/css">
+body {
+  margin-top:0 !important;
+  padding-top:0 !important;
+  min-width:800px !important;
+}
+</style>
+<div id="wm-ipp" lang="en" style="display:none;">
+
+<div style="position:fixed;left:0;top:0;width:100%!important">
+<div id="wm-ipp-inside">
+   <table style="width:100%;"><tbody><tr>
+   <td id="wm-logo">
+       <a href="/web/" title="Wayback Machine home page"><img src="/static/images/toolbar/wayback-toolbar-logo.png" alt="Wayback Machine" width="110" height="39" border="0" /></a>
+   </td>
+   <td class="c">
+       <table style="margin:0 auto;"><tbody><tr>
+       <td class="u" colspan="2">
+       <form target="_top" method="get" action="/web/form-submit.jsp" name="wmtb" id="wmtb"><input type="text" name="url" id="wmtbURL" value="http://www.stripedgazelle.org/joey/dream.html" style="width:400px;" onfocus="this.focus();this.select();" /><input type="hidden" name="type" value="replay" /><input type="hidden" name="date" value="20130102205942" /><input type="submit" value="Go" /><span id="wm_tb_options" style="display:block;"></span></form>
+       </td>
+       <td class="n" rowspan="2">
+           <table><tbody>
+           <!-- NEXT/PREV MONTH NAV AND MONTH INDICATOR -->
+           <tr class="m">
+           	<td class="b" nowrap="nowrap">
+		
+		    <a href="/web/20121128095554/http://www.stripedgazelle.org/joey/dream.html" title="28 Nov 2012">NOV</a>
+		
+		</td>
+		<td class="c" id="displayMonthEl" title="You are here: 20:59:42 Jan 2, 2013">JAN</td>
+		<td class="f" nowrap="nowrap">
+		
+		    <a href="/web/20130615131246/http://www.stripedgazelle.org/joey/dream.html" title="15 Jun 2013"><strong>JUN</strong></a>
+		
+                </td>
+	    </tr>
+           <!-- NEXT/PREV CAPTURE NAV AND DAY OF MONTH INDICATOR -->
+           <tr class="d">
+               <td class="b" nowrap="nowrap">
+               
+                   <a href="/web/20121128095554/http://www.stripedgazelle.org/joey/dream.html" title="9:55:54 Nov 28, 2012"><img src="/static/images/toolbar/wm_tb_prv_on.png" alt="Previous capture" width="14" height="16" border="0" /></a>
+               
+               </td>
+               <td class="c" id="displayDayEl" style="width:34px;font-size:24px;" title="You are here: 20:59:42 Jan 2, 2013">2</td>
+	       <td class="f" nowrap="nowrap">
+               
+		   <a href="/web/20130615131246/http://www.stripedgazelle.org/joey/dream.html" title="13:12:46 Jun 15, 2013"><img src="/static/images/toolbar/wm_tb_nxt_on.png" alt="Next capture" width="14" height="16" border="0" /></a>
+	       
+	       </td>
+           </tr>
+           <!-- NEXT/PREV YEAR NAV AND YEAR INDICATOR -->
+           <tr class="y">
+	       <td class="b" nowrap="nowrap">
+               
+                   <a href="/web/20111227150315/http://www.stripedgazelle.org/joey/dream.html" title="27 Dec 2011"><strong>2011</strong></a>
+               
+               </td>
+               <td class="c" id="displayYearEl" title="You are here: 20:59:42 Jan 2, 2013">2013</td>
+	       <td class="f" nowrap="nowrap">
+               
+	           <a href="/web/20140626041924/http://www.stripedgazelle.org/joey/dream.html" title="26 Jun 2014"><strong>2014</strong></a>
+	       
+	       </td>
+           </tr>
+           </tbody></table>
+       </td>
+       </tr>
+       <tr>
+       <td class="s">
+           <a class="t" href="/web/20130102205942*/http://www.stripedgazelle.org/joey/dream.html" title="See a list of every capture for this URL">58 captures</a>
+           <div class="r" title="Timespan for captures of this URL">16 Oct 03 - 26 Apr 15</div>
+       </td>
+       <td class="k">
+       <a href="" id="wm-graph-anchor">
+       <div id="wm-ipp-sparkline" title="Explore captures for this URL">
+	 <img id="sparklineImgId" alt="sparklines"
+		 onmouseover="__wm.st(1)" onmouseout="__wm.st(0)"
+		 onmousemove="__wm.mv(event,this)"
+		 width="500"
+		 height="27"
+		 border="0"
+		 src="/web/jsp/graph.jsp?graphdata=500_27_1996:-1:000000000000_1997:-1:000000000000_1998:-1:000000000000_1999:-1:000000000000_2000:-1:000000000000_2001:-1:000000000000_2002:-1:000000000000_2003:-1:000000000101_2004:-1:000001010001_2005:-1:010100000100_2006:-1:000010101100_2007:-1:001112033701_2008:-1:011121000000_2009:-1:100000101000_2010:-1:000100000000_2011:-1:000000010011_2012:-1:060000000010_2013:0:100003000000_2014:-1:000001000001_2015:-1:000100000000" />
+       </div>
+       </a>
+       </td>
+       </tr></tbody></table>
+   </td>
+   <td class="r">
+       <a href="#close" onclick="__wm.h();return false;" style="background-image:url(/static/images/toolbar/wm_tb_close.png);top:5px;" title="Close the toolbar">Close</a>
+       <a href="http://faq.web.archive.org/" style="background-image:url(/static/images/toolbar/wm_tb_help.png);bottom:5px;" title="Get some help using the Wayback Machine">Help</a>
+   </td>
+   </tr></tbody></table>
+</div>
+</div>
+</div>
+<script type="text/javascript">__wm.bt();</script>
+<!-- END WAYBACK TOOLBAR INSERT -->
+<h1>The 'dream' Scheme Interpreter</h1> 
+by David Joseph Stith
+<hr> 
+<b>Welcome to the home of my Scheme interpreter/compiler, 'dream', written in x86 machine language. :-)</b> 
+<br /> 
+All essential syntax and procedures from the <a href="/web/20130102205942/http://www.swiss.ai.mit.edu/~jaffer/r4rs_toc.html">R4RS standard</a> are implemented.
+<br /> 
+The interpreter is properly tail recursive and passes all applicable tests from the 'r4rstest.scm' test suite.
+<br /> 
+Rational arithmetic with 32 bit magnitude numerator and denominator, or up to 262112 bit magnitude if the GMP library is available, is supported (with sign stored separately), but no Real or Complex numbers (these currently are in the works).
+<hr> 
+Dream is compiled using an x86 assembler written in Scheme, with a syntax very similar to GAS.
+<br /> 
+Consequently Dream compiles itself. :-)
+<hr> 
+<b>Download latest version for Linux on x86:</b> 
+<a href="/web/20130102205942/http://www.stripedgazelle.org/cgi-bin/wiki_joey/dream20121030.tar.gz">dream20121030.tar.gz</a>
+<dt>Linux:</dt> 
+<dd>'dream' is an ELF executable that may use Linux syscalls only or, by default, is dynamically linked with <b>ld-linux.so.2</b> in order to provide access in scheme to dlopen, dlclose, and dlsym.</dd>
+<dd>In particular, if <b>libgmp.so.3</b> is available then it is dynamically loaded in order to implement multiple precision integer arithmetic.</dd>
+<hr>
+<b>Check out my DreamOS based on the Dream Scheme 
+Interpreter as a bootable floppy disk:</b> <a href="dreamos.html">dreamos</a>
+ 
+ :-)
+<hr> 
+<h2>Notes on the Design</h2> 
+<p> 
+The design for the 'dream' Scheme interpreter began with the design given in Abelson and Sussman's <a href="/web/20130102205942/http://mitpress.mit.edu/sicp/full-text/book/book.html">Structure and Interpretation of Computer Programs</a>.
+</p> 
+<p>In the following I will use the term 'byte' to refer to 8 bits, 'wyde' to refer to two bytes, 'tetra' to refer to four bytes, and 'octa' to refer to eight bytes.</p> 
+<h2>Garbage Collection</h2> 
+<p> 
+Two areas of memory of equal size are used for the storage of scheme objects.
+Both are aligned on an 8-byte boundary.
+Only one of the two is used at a time by the scheme interpreter; when it becomes full, the garbage collector copies all scheme objects in use to the other memory area (which then becomes the active one).
+Dynamically allocated scheme objects other than symbols are represented by a discrete number of quad-words which are allocated consecutively within the active memory area.
+<h2>Scheme Object Types</h2> 
+The simplest object is the scheme pair which consists of two tetras each of which addresses a scheme object.
+</p> 
+<p> 
+Symbols and statically allocated objects are not garbage-collected, but they must begin on a wyde boundary so that the addresses stored in pairs are always divisible by 2.
+By virtue of the fact that all scheme objects begin on a wyde boundary, scheme objects other than scheme pairs are differentiated from scheme pairs by storing a tetra which is NOT divisible by 2 in the first tetra of the octa.
+This tetra represents the type of scheme object.
+The low byte of this type represents the major type classification used by the procedures boolean?, pair?, procedure?, char?, number?, symbol?, string?, vector?, input-port?, and output-port?.
+Statically allocated objects are given a type which is negative (sign bit set) so that the garbage collector can easily ignore them.
+All 256 ascii chars, #t and #f, and the end-of-file object are statically allocated.
+Only one tetra is necessary for these statically allocated objects.
+In the case of chars and booleans, the value is stored in the high byte of the low wyde.
+</p> 
+<table border> 
+<tr> 
+<th></th><th>Bit:</th><th>0-7</th><th>8</th><th>9</th><th>10-15</th><th>16</th><th>17</th><th>18-30</th><th>31</th> 
+</tr> 
+<tr> 
+<th colspan="2">Scheme Object</th><th>Major Type</th><th>CDR is scheme?</th><th colspan="2">Minor Type</th><th colspan="3">Type Specific Info</th><th>Statically Allocated?</th> 
+</tr> 
+<tr> 
+<td rowspan="2">NUMBER</td><td>INTEGER</td><td rowspan="2">3</td><td>0</td><td colspan="2">0</td><td rowspan="2">Exact?</td><td>Negative?</td><td>Length in tetras (or 0 if value is stored directly in CDR)</td><td rowspan="2">0</td> 
+</tr> 
+<tr> 
+<td>RATIONAL</td><td>1</td><td colspan="2">0</td><td colspan="2"></td> 
+</tr> 
+<tr> 
+<tr> 
+<td rowspan="2">PORT</td><td>OUTPUT</td><td rowspan="2">5</td><td>0</td><td colspan="2">0</td><td colspan="3" rowspan="2"></td><td rowspan="2">0</td> 
+</tr> 
+<tr> 
+<td>INPUT</td><td>0</td><td colspan="2">1</td> 
+</tr> 
+<td colspan="2">STRING</td><td>7</td><td>0</td><td>Immutable?</td><td colspan="4">Length in bytes</td><td>0</td> 
+</tr> 
+<tr> 
+<td colspan="2">VECTOR</td><td>9</td><td>1</td><td>0</td><td colspan="4">Length in objects</td><td>0</th> 
+</tr> 
+</table> 
+<p> 
+Symbols are also given a negative type, since they are not garbage collected, but they are dynamically created in a separate memory area devoted to them.
+Each symbol begins with the tetra type header (on a wyde boundary) which is followed by the bytes of ascii code that form the name of the symbol.
+A zero byte marks the end of the symbol name.
+The address of every symbol is stored in a simple hash keyed on just the first character of the symbol.
+</p> 
+<p> 
+Strings, unlike symbols, are stored along with the other dynamically allocated objects, and use the second tetra to store the address of their string of ascii byte codes.
+Furthermore, unlike symbols, the length of the string is stored in the header.
+For mutable strings (the default) another pair of memory areas of equal size is used to store these strings of ascii byte codes.
+When the active string storage area becomes full, the garbage collector copies in-use string data to the other string storage area (which then becomes the active one).
+Otherwise the garbage collector leaves these string storage areas untouched.
+The ascii data for immutable strings (produced by symbol->string) are always ignored by the garbage collector.
+</p> 
+<p> 
+Vectors are stored as consecutive pairs (but the first tetra of the first pair is the vector type header.)
+The length of the vector is stored in the header.
+This and all other objects which require more than an octa of storage simply store the address of a scheme object in the second tetra and set the low bit in the high byte of the low wyde of their type to indicate to the garbage collector that this address in the second tetra must be followed just as if it were the cdr of a pair.
+</p> 
+<p> 
+Procedures store their starting address in the second tetra.
+</p> 
+<p> 
+Number types are distinguished by the high byte of the low wyde, which increases as the complexity of the type of number ascends the numeric tower.  Integers simply store their 32 bit unsigned value in the second tetra. But integers requiring more than 32 bits for their absolute value store their length (in tetras) in the high 14 bits of their type tetra (sign bit clear), and the address of their data (just like string storage) in the second tetra.  Rationals are stored as a pair of integers, thus the low bit in the high byte of the low wyde of their type is set so that the garbage collector will copy the pair.  Inexactness of a number is indicated by setting the lowest bit of the high wyde of the number's type.  Note, however, that all internal representations of numbers are exact (no floating point numbers are used), and so inexactness is given only as an auxiliary property of the number.
+</p> 
+<p> 
+Input ports use the low byte of the high wyde of the type field to store the last character read by the (peek) procedure.  The second tetra for both input and output ports holds the file descriptor associated with the port.
+The ports returned by (current-input-port) and (current-output-port) are stored internally for efficiency's sake; they therefore must be treated by the garbage collector as if they were registers (and hence saved on the scheme stack before garbage collection begins and restored afterward).
+</p> 
+<p> 
+Closures are initially stored simply as scheme along with the enclosing environment.
+But as soon as the closure is applied, it is compiled to machine code.
+This machine code is not relocatable, and hence a different garbage collection strategy is employed for this memory area.
+The garbage collector maintains a list of start addresses of machine code of active closures, and at the beginning of each machine code block is stored a pointer to the address immediately following the end of the machine code for that closure.
+Using this information, the largest free space is identified, and compilation of new closures occurs sequentially here until this space is filled.
+At this point the garbage collector is invoked again, the largest space identified, and the process repeats.
+This garbage collection process for machine code may be invoked from scheme with (sys-gc-lambda), which returns #t if a free space was found larger than the one that had been in use immediately prior.
+</p> 
+<h2>The Stack</h2> 
+<p> 
+The scheme object stack is maintained as a scheme list (dynamically allocated as pairs).
+The garbage collector, when it runs, begins at the root of this scheme list.
+Hence when garbage collection commences, only the registers and the current input and output ports need be saved on this scheme object stack and restored afterward to insure that all reachable objects are retained throughout the garbage collection process.
+The native x86 stack (pointed to by the ESP register) is used for the flow of continuation control.
+Consequently when call-with-current-continuation is invoked, this native stack is copied to a scheme list with each address represented as an Integer.
+</p> 
+<h2>Scheme Registers</h2>
+<p> 
+The registers denoted by EXP, ENV, UNEV, ARGL, VAL, and FREE in <a href="/web/20130102205942/http://mitpress.mit.edu/sicp/full-text/book/book.html">Structure and Interpretation of Computer Programs</a> are implemented by the machine registers EDX, EBP, ESI, EDI, EAX, and EBX respectively.
+The registers EXP, ENV, UNEV, ARGL, and VAL must point to a valid scheme object (or be zero) when the garbage collector is invoked.
+Likewise, the garbage collector registers OLD, NEW, and SCAN are implemented by the machine registers ESI, EDI, and EAX respectively.
+<hr>
+<a href="home.html">home</a>
+
+</html>
+
+
+
+
+
+<!--
+     FILE ARCHIVED ON 20:59:42 Jan 2, 2013 AND RETRIEVED FROM THE
+     INTERNET ARCHIVE ON 9:16:16 Jun 19, 2015.
+     JAVASCRIPT APPENDED BY WAYBACK MACHINE, COPYRIGHT INTERNET ARCHIVE.
+
+     ALL OTHER CONTENT MAY ALSO BE PROTECTED BY COPYRIGHT (17 U.S.C.
+     SECTION 108(a)(3)).
+-->
+

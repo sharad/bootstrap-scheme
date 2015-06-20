@@ -1,0 +1,45 @@
+My dream Scheme interpreter is able to compile itself by virtue of this x86 assembler: asm86.scm To produce a simple ELF header for Linux, I use this: elf.scm
+Here is a minimal example of its use to produce a Hello World Linux executable:
+
+(load "asm86.scm")
+(define SYS_EXIT 1)
+(define SYS_WRITE 4)
+(define STDOUT 1)
+(define (program)
+  (load "elf.scm")
+ (: 'start)
+  (mov SYS_WRITE eax)
+  (mov STDOUT ebx)
+  (mov 'hello ecx)
+  (mov 13 edx) ;Count bytes to write
+  (int #x80) ;Kernel Interrupt
+  (mov SYS_EXIT eax)
+  (mov 0 ebx)
+  (int #x80)
+  (data)
+ (: 'hello)
+  (asciz "Hello World!\n"))
+(compile program "hello")
+
+To produce a simple PE header for Windows, I use this: pe.scm
+Here is a minimal example of its use to produce a Hello World Windows executable:
+
+(load "asm86.scm")
+(define (program)
+  (load "pe.scm")
+ (: 'start)
+  (push -12) ;STDOUT
+  (calln (@ 'GetStdHandle))
+  (push 0)
+  (push 'bytes_written)
+  (push 13) ;Number of bytes to write
+  (push 'hello)
+  (push eax) ;File Handle
+  (calln (@ 'WriteFile))
+  (ret)
+  (data)
+ (: 'hello)
+  (asciz "Hello World!\n")
+  (bss 'bytes_written 0))
+(compile program "hello.exe")
+
