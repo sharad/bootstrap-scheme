@@ -6,6 +6,11 @@
 
 * In assembly try to implement assembly macro.
 ** Assembly for x86_64 ARM
+
+* Try to implement
+- backtrace for scheme
+- error handling for scheme
+
 * find about self modifying code example, try to run it directly from scheme.
 
 * than next scheme to scheme

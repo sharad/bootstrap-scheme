@@ -22,7 +22,11 @@
 #include <ctype.h>
 #include "model.h"
 
+#ifdef DEBUG_VERBOSE
+int debug = 1;
+#else
 int debug = 0;
+#endif
 
 /**************************** MODEL ******************************/
 /***************************** READ ******************************/

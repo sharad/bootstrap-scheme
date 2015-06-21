@@ -1,25 +1,34 @@
 
+ifdef DEBUG_VERBOSE
+CDEFS += -DDEBUG_VERBOSE
+endif
 
 
-.PHONY: clean
+
 
 # CFLAGS=-Wall -ansi
 # CFLAGS=-g -ggdb -g3 -ggdb3 -Wall -ansi
-CFLAGS=-g -ggdb -g3 -ggdb3 -Wall -Werror #-Wimplicit-function-declaration
+CFLAGS=-g -ggdb -g3 -ggdb3 -Wall -Werror $(CDEFS) #-Wimplicit-function-declaration
 
 OBJECTS=model.o builtinproc.o read.o print.o eval.o scheme.o
+
+.PHONY: clean
 
 all: tags scheme1 scheme
 
 scheme: $(OBJECTS)
-	$(CC) -g -ggdb -g3 -ggdb3 -Wall -o $@ $(OBJECTS)
+	$(CC) $(CFLAGS) -o $@ $(OBJECTS)
 	# echo '(begin (load "lib/stdlib.scm") (load "864sch/hello-elf.scm"))' | ./scheme
 	cd 864sch ; echo '(begin (load "../lib/stdlib.scm") (load "hello-elf.scm"))' | ../scheme ; cd ..
 	readelf -e 864sch/hello
 	864sch/hello
 
 scheme1: scheme1.o
-	$(CC) -g -ggdb -g3 -ggdb3 -Wall -o $@ $<
+	$(CC) $(CFLAGS) -o $@ $<
+
+test: scheme scheme1
+	echo '(begin (load "test/regression/specialforms.scm"))' | ./scheme
+	echo '(begin (load "test/regression/specialforms.scm"))' | ./scheme1
 
 GPATH GRTAGS GSYMS GTAGS:
 	gtags -v
